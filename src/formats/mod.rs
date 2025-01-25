@@ -1,7 +1,10 @@
+pub mod days;
 pub mod degs;
 pub mod hrs;
 pub mod mins;
+pub mod months;
 pub mod secs;
+pub mod yrs;
 
 use std::str::Utf8Error;
 

@@ -5,7 +5,8 @@ use nom::{bytes::complete::take, combinator::map_res, IResult};
 
 use super::FormatError;
 
-// Represents `MM` from `00-59`
+/// Represents `MM` from `00-59`
+#[derive(Debug)]
 pub struct Minutes(u8);
 
 impl Minutes {
@@ -33,6 +34,18 @@ impl Minutes {
 impl Display for Minutes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:02}", self.0)
+    }
+}
+
+impl PartialEq<u8> for Minutes {
+    fn eq(&self, other: &u8) -> bool {
+        self.0.eq(other)
+    }
+}
+
+impl PartialEq for Minutes {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.eq(&other.0)
     }
 }
 

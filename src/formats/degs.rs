@@ -5,7 +5,7 @@ use nom::{bytes::complete::take, combinator::map_res, IResult};
 
 use super::FormatError;
 
-// Represents `DDD` from `000-359`
+/// Represents `DDD` from `000-359`
 pub struct Degrees(u16);
 
 impl Degrees {
@@ -36,7 +36,8 @@ impl Display for Degrees {
     }
 }
 
-// Represents `sDD` from `-90-90`
+// Represents `sDD` from `-90 to 90`
+#[derive(Debug)]
 pub struct SignedDegrees(i8);
 
 impl SignedDegrees {
@@ -48,7 +49,7 @@ impl SignedDegrees {
     }
 
     pub fn from_bytes(input: &[u8]) -> IResult<&[u8], Self> {
-        map_res(take(2usize), |value| {
+        map_res(take(3usize), |value| {
             let v = str::from_utf8(value)?;
             let val = v
                 .parse::<i8>()
@@ -64,5 +65,17 @@ impl SignedDegrees {
 impl Display for SignedDegrees {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:+02}", self.0)
+    }
+}
+
+impl PartialEq<i8> for SignedDegrees {
+    fn eq(&self, other: &i8) -> bool {
+        self.0.eq(other)
+    }
+}
+
+impl PartialEq for SignedDegrees {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.eq(&other.0)
     }
 }
