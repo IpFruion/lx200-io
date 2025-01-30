@@ -13,11 +13,16 @@ use crate::{
 };
 
 pub const GET_RIGHT_ASCENSION: &[u8] = b":GR#";
+pub const GET_OBJECT_RIGHT_ASCENSION: &[u8] = b":Gr#";
 
 #[cfg(not(feature = "roms"))]
 pub const GET_RIGHT_ASCENSION_SIZE: usize = b"+HH:MM.T#".len();
 #[cfg(feature = "roms")]
 pub const GET_RIGHT_ASCENSION_SIZE: usize = b"+HH:MM:SS#".len();
+#[cfg(not(feature = "roms"))]
+pub const GET_OBJECT_RIGHT_ASCENSION_SIZE: usize = b"HH:MM.T#".len();
+#[cfg(feature = "roms")]
+pub const GET_OBJECT_RIGHT_ASCENSION_SIZE: usize = b"HH:MM:SS#".len();
 
 pub struct Ascension {
     pub hours: Hours,
@@ -35,7 +40,7 @@ impl Ascension {
     /// *NOTE* A Mapug-Astronomy post indicated that for the 3.34L ROMS the format is +HH:MM:SS# for RA
     #[cfg(feature = "roms")]
     pub fn parse(input: &[u8]) -> Result<Self, Error> {
-        let (input, _) = tag("+")(input)?;
+        let (input, _) = opt(tag("+"))(input)?;
         let (input, hours) = Hours::from_bytes(input)?;
         let (input, _) = tag(":")(input)?;
         let (input, minutes) = Minutes::from_bytes(input)?;
@@ -53,7 +58,9 @@ impl Ascension {
     /// This correspondds to horizontal rotation when looking at the sky.
     #[cfg(not(feature = "roms"))]
     pub fn parse(input: &[u8]) -> Result<Self, Error> {
-        let (input, _) = tag("+")(input)?;
+        use nom::combinator::opt;
+
+        let (input, _) = opt(tag("+"))(input)?;
         let (input, hours) = Hours::from_bytes(input)?;
         let (input, _) = tag(":")(input)?;
         let (input, minutes) = Minutes::from_bytes(input)?;
@@ -71,13 +78,9 @@ impl Ascension {
 impl Display for Ascension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         #[cfg(not(feature = "roms"))]
-        write!(
-            f,
-            "{}:{}.{}#",
-            self.hours, self.minutes, self.tenths_minutes
-        )?;
+        write!(f, "{}:{}.{}", self.hours, self.minutes, self.tenths_minutes)?;
         #[cfg(feature = "roms")]
-        write!(f, "{}:{}:{}#", self.hours, self.minutes, self.seconds)?;
+        write!(f, "{}:{}:{}", self.hours, self.minutes, self.seconds)?;
         Ok(())
     }
 }

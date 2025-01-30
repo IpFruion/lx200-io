@@ -8,6 +8,7 @@ use crate::{
 };
 
 pub const GET_DECLANATION: &[u8] = b":GD#";
+pub const GET_OBJECT_DECLANATION: &[u8] = b":Gd#";
 #[cfg(not(feature = "roms"))]
 pub const GET_DECLANATION_SIZE: usize = b"sDD\xDFMM#".len();
 #[cfg(feature = "roms")]
@@ -43,5 +44,14 @@ impl Declination {
             minutes,
             arc_seconds,
         })
+    }
+
+    pub fn set_request(&self) -> Vec<u8> {
+        let mut bytes = b":Sd ".to_vec();
+        bytes.extend(self.degrees.to_string().as_bytes());
+        bytes.push(b'\xDF');
+        bytes.extend(self.minutes.to_string().as_bytes());
+        bytes.push(b'#');
+        bytes
     }
 }

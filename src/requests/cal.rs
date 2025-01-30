@@ -21,10 +21,6 @@ pub struct Date {
 }
 
 impl Date {
-    pub fn set_request(&self) -> Vec<u8> {
-        format!(":SC {}#", self).into_bytes()
-    }
-
     pub fn parse(input: &[u8]) -> Result<Self, Error> {
         let (input, months) = Months::from_bytes(input)?;
         let (input, _) = tag(b"/")(input)?;
