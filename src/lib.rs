@@ -1,3 +1,5 @@
+use std::ops::{Deref, DerefMut};
+
 use error::Error;
 use formats::hrs::SignedHours;
 use requests::{
@@ -43,6 +45,18 @@ pub struct Client<T> {
 impl<T: Stream> Client<T> {
     pub fn new(stream: T) -> Self {
         Client { stream }
+    }
+
+    pub fn get_mut(&mut self) -> &mut T {
+        &mut self.stream
+    }
+}
+
+impl<T: Stream + 'static> Client<T> {
+    pub fn into_boxed(self) -> BoxedClient {
+        BoxedClient(Client {
+            stream: Box::new(self.stream),
+        })
     }
 }
 
@@ -370,6 +384,22 @@ impl Client<Box<dyn serialport::SerialPort>> {
 impl Client<std::net::TcpStream> {
     pub fn connect(addr: std::net::Ipv4Addr) -> std::io::Result<Self> {
         std::net::TcpStream::connect((addr, 9998)).map(|stream| Client { stream })
+    }
+}
+
+pub struct BoxedClient(Client<Box<dyn Stream>>);
+
+impl Deref for BoxedClient {
+    type Target = Client<Box<dyn Stream>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for BoxedClient {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 
